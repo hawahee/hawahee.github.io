@@ -1,0 +1,239 @@
+<html>
+
+  <head>
+
+    <title>
+      Transect creator
+    </title>
+
+    <link rel = "icon" type = "image/svg" href = "icon.svg">
+
+    <style>
+
+      body
+      {
+        font-family: arial, sans-serif;
+      }
+
+      input[type = "number"]
+      {
+        width: 153px;
+        text-align: right;
+      }
+
+      table
+      {
+        border-collapse: collapse;
+        text-align: center;
+      }
+
+      #imagecell
+      {
+        background-image: url("illustration.svg");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 45%;
+        height: 150px;
+      }
+
+      td, th
+      {
+        font-weight: bold;
+        padding: 8px;
+      }
+
+      th
+      {
+        font-size: 22px;
+      }
+
+      tr
+      {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+      }
+
+      tr.borderless
+      {
+        border-bottom: 1px solid rgba(0, 0, 0, 0);
+      }
+
+      textarea
+      {
+        height: 5em;
+        min-width: 310px;
+        max-width: 700px;
+        min-height: 25px;
+        max-height: 500px;
+      }
+
+    </style>
+
+    <script>
+
+      function fixText(text)
+      {
+        text = text.replaceAll("{", "");
+        text = text.replaceAll("}", "");
+        text = text.replaceAll("[", "");
+        text = text.replaceAll("]", "");
+        text = text.replaceAll("'", "");
+        text = text.replaceAll("\"", "");
+        text = text.replaceAll(" ", "");
+        text = text.replaceAll("\t", ",");
+        text = text.replaceAll("\n", ",");
+        text = text.replaceAll(";", ",");
+        text = text.replaceAll(",", ", ");
+        return text;
+      }
+
+      function textToValues(text)
+      {
+        return text.split(",").map(Number);
+      }
+
+      function calculate()
+      {
+        var textXs = fixText(document.getElementById("coordsX").value);
+        var textYs = fixText(document.getElementById("coordsY").value);
+        document.getElementById("coordsX").value = textXs;
+        document.getElementById("coordsY").value = textYs;
+
+        var sX = document.getElementById("startX").value;
+        var sY = document.getElementById("startY").value;
+        var eX = document.getElementById("endX").value;
+        var eY = document.getElementById("endY").value;
+        var x = textToValues(textXs);
+        var y = textToValues(textYs);
+
+        var dx = eX - sX;
+        var dy = eY - sY;
+
+        var x_new = x.map(i => 1);
+        var y_new = y.map(i => 1);
+
+        if (dx == 0)
+        {
+          x_new = x.map(i => sX);
+          y_new = y;
+        }
+
+        if (dy == 0)
+        {
+          x_new = x;
+          y_new = y.map(i => sY);
+        }
+
+        if (dx != 0 && dy != 0)
+        {
+          var n = dy / dx;
+          var m = sY - n * sX;
+          var p = x.map(i => 0);
+          for (var i = 0; i < x.length; i++)
+          {
+            p[i] = y[i] + x[i] / n;
+          }
+          x_new = p.map(i => (i - m) / (n + 1 / n));
+          y_new = x_new.map(i => n * i + m);
+        }
+
+        var dir = x_new.map(i => -1);
+        for (var i = 0; i < dir.length; i++)
+        {
+          if ((eX > sX) == (x_new[i] > sX))
+          {
+            dir[i] = 1;
+          }
+        }
+
+        var distance_along = x_new.map(i => 0);
+        for (var i = 0; i < distance_along.length; i++)
+        {
+          distance_along[i] = dir[i] * ((sX - x_new[i])**2 + (sY - y_new[i])**2)**(1/2);
+        }
+
+        document.getElementById("distanceAlong").value = fixText(distance_along.toString());
+
+        var distance_normal = x_new.map(i => 0);
+        for (var i = 0; i < distance_normal.length; i++)
+        {
+          distance_normal[i] = ((x[i] - x_new[i])**2 + (y[i] - y_new[i])**2)**(1/2);
+        }
+
+        document.getElementById("distanceNormal").value = fixText(distance_normal.toString());
+      }
+
+    </script>
+
+  </head>
+
+  <body>
+
+  <center>
+
+    <table>
+
+      <tr>
+        <th colspan = 3>Project coordinates onto transect</th>
+      </tr>
+
+      <tr>
+        <td>Illustration</td>
+        <td id = "imagecell" colspan = 2></td>
+      </tr>
+
+      <tr>
+        <td></td>
+        <td colspan = 2>
+          <button onclick = "calculate()">
+            CALCULATE
+          </button>
+        </td>
+      </tr>
+
+      <tr class = "borderless">
+        <td rowspan = 2>Input</td>
+        <td>
+          <span>Start</span><br>
+          <input id = "startX" type = "number" value = 2 step = 0.001>
+          <input id = "startY" type = "number" value = 4 step = 0.001>
+        </td>
+        <td>
+          <span>End</span><br>
+          <input id = "endX" type = "number" value = 4 step = 0.001>
+          <input id = "endY" type = "number" value = 0 step = 0.001>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <span>X-coordinates</span><br>
+          <textarea id = "coordsX" name = "Xs" placeholder = "x_1, x_2, ...">0, 5</textarea>
+        </td>
+        <td>
+          <span>Y-coordinates</span><br>
+          <textarea id = "coordsY" name = "Ys" placeholder = "y_1, y_2, ...">1, 2</textarea>
+        </td>
+      </tr>
+
+      <tr class = "borderless">
+        <td rowspan = 2>Output</td>
+        <td colspan = 2>
+          <span>D<sub>A</sub> - Distance along the transect</span><br>
+          <textarea id = "distanceAlong" name = "D_A" placeholder = "D_A1, D_A2, ..." readOnly = "true" cols = "84"></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan = 2>
+          <span>D<sub>N</sub> - Distance normal to the transect</span><br>
+          <textarea id = "distanceNormal" name = "D_N" placeholder = "D_N1, D_N2, ..." readOnly = "true" cols = "84"></textarea>
+        </td>
+      </tr>
+
+    </table>
+
+  </center>
+
+  </body>
+
+</html>
