@@ -1,0 +1,85 @@
+<html>
+
+  <head>
+
+    <title>
+      Calculator
+    </title>
+
+    <link rel = "icon" type = "image/svg" href = "icon.svg">
+
+    <style>
+
+      body
+      {
+        font-family: arial, sans-serif;
+      }
+
+      textarea
+      {
+        min-height: 82px;
+        max-height: 502px;
+        min-width: 500px;
+        max-width: 1000px;
+      }
+
+    </style>
+
+    <script>
+
+      function fixText(text)
+      {
+        text = text.replaceAll("^", "**");
+        text = text.replaceAll("PI", "Math.PI");
+        text = text.replaceAll("pi", "Math.PI");
+        text = text.replaceAll("sin", "Math.sin");
+        text = text.replaceAll("cos", "Math.cos");
+        text = text.replaceAll("tan", "Math.tan");
+        return text;
+      }
+
+      function calculate()
+      {
+        var text = fixText(document.getElementById("formula").value);
+        var result = eval(text);
+        document.getElementById("result").innerHTML = result;
+      }
+
+      function testInput(element, e)
+      {
+        if (e.keyCode == 13)
+        {
+          calculate();
+          e.preventDefault();
+        }
+      }
+
+    </script>
+
+  </head>
+
+  <body>
+
+  <center>
+
+    <h3>
+      Calculator
+    </h3>
+
+    <p id = "result">
+      -
+    </p>
+
+    <textarea id = "formula" name = "formula" placeholder = "2 * 3 + 1" autofocus onKeyPress = "return testInput(this, event);"></textarea>
+
+    <p>
+      <button onClick = "calculate()">
+        CALCULATE
+      </button>
+    </p>
+
+  </center>
+
+  </body>
+
+</html>
