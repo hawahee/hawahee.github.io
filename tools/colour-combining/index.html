@@ -1,0 +1,199 @@
+<html>
+
+  <head>
+
+    <title>
+      Colour combining
+    </title>
+
+    <link rel = "icon" type = "image/svg" href = "icon.svg">
+
+    <style>
+
+      body
+      {
+        font-family: arial, sans-serif;
+      }
+
+      input[type = "number"]
+      {
+        width: 153px;
+        text-align: right;
+      }
+
+      table
+      {
+        border-collapse: collapse;
+        text-align: center;
+      }
+
+      #imagecell
+      {
+        background-image: url("icon.svg");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 25%;
+        height: 150px;
+      }
+
+      .previewColour
+      {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 1px solid rgb(127, 127, 127);
+        background: rgba(255, 255, 255, 255);
+      }
+
+      td, th
+      {
+        font-weight: bold;
+        padding: 8px;
+      }
+
+      th
+      {
+        font-size: 22px;
+      }
+
+      tr
+      {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+      }
+
+    </style>
+
+    <script>
+
+      function combined_alpha(ba, oa)
+      {
+        var ca = ba * (1 - oa) + oa;
+        return ca;
+      }
+
+      function combined_rgb(bc, ba, oc, oa)
+      {
+        var ca = combined_alpha(ba, oa);
+        if (ca == 0)
+        {
+          return 255;
+        }
+        var cc = (bc * ba * (1 - oa) + oc * oa) / ca;
+        return Math.floor(cc + 0.5);
+      }
+
+      function colour_style(r, g, b, a)
+      {
+        return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+      }
+
+      function calculate()
+      {
+        var background_red = parseInt(document.getElementById("backgroundRed").value);
+        var background_green = parseInt(document.getElementById("backgroundGreen").value);
+        var background_blue = parseInt(document.getElementById("backgroundBlue").value);
+        var background_alpha = parseInt(document.getElementById("backgroundAlpha").value) / 255;
+
+        var overlay_red = parseInt(document.getElementById("overlayRed").value);
+        var overlay_green = parseInt(document.getElementById("overlayGreen").value);
+        var overlay_blue = parseInt(document.getElementById("overlayBlue").value);
+        var overlay_alpha = parseInt(document.getElementById("overlayAlpha").value) / 255;
+
+        var result_red = combined_rgb(background_red, background_alpha, overlay_red, overlay_alpha);
+        var result_green = combined_rgb(background_green, background_alpha, overlay_green, overlay_alpha);
+        var result_blue = combined_rgb(background_blue, background_alpha, overlay_blue, overlay_alpha);
+        var result_alpha = combined_alpha(background_alpha, overlay_alpha);
+
+        document.getElementById("resultRed").innerHTML = result_red;
+        document.getElementById("resultGreen").innerHTML = result_green;
+        document.getElementById("resultBlue").innerHTML = result_blue;
+        document.getElementById("resultAlpha").innerHTML = Math.floor(result_alpha * 255 + 0.5);
+
+        document.getElementById("backgroundColour").style.background = colour_style(background_red, background_green, background_blue, background_alpha);
+        document.getElementById("overlayColour").style.background = colour_style(overlay_red, overlay_green, overlay_blue, overlay_alpha);
+        document.getElementById("resultColour").style.background = colour_style(result_red, result_green, result_blue, result_alpha);
+      }
+
+    </script>
+
+  </head>
+
+  <body onload = "calculate()">
+
+  <center>
+
+    <table>
+
+      <tr>
+        <th colspan = 6>RGB colour combining - premultiplied alpha compositing</th>
+      </tr>
+
+      <tr>
+        <td>Illustration</td>
+        <td id = "imagecell" colspan = 5></td>
+      </tr>
+
+      <tr>
+        <td>Background colour</td>
+        <td>
+          <input title = "Red" type = "number" id = "backgroundRed" value = 255 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <input title = "Green" type = "number" id = "backgroundGreen" value = 127 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <input title = "Blue" type = "number" id = "backgroundBlue" value = 0 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <input title = "Alpha" type = "number" id = "backgroundAlpha" value = 127 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <div class = "previewColour" id = "backgroundColour"></div>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Overlay colour</td>
+        <td>
+          <input title = "Red" type = "number" id = "overlayRed" value = 0 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <input title = "Green" type = "number" id = "overlayGreen" value = 127 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <input title = "Blue" type = "number" id = "overlayBlue" value = 255 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <input title = "Alpha" type = "number" id = "overlayAlpha" value = 127 min = 0 max = 255 onchange = "calculate()">
+        </td>
+        <td>
+          <div class = "previewColour" id = "overlayColour"></div>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Resulting colour</td>
+        <td>
+          <span title = "Red" id = "resultRed">-</span>
+        </td>
+        <td>
+          <span title = "Green" id = "resultGreen">-</span>
+        </td>
+        <td>
+          <span title = "Blue" id = "resultBlue">-</span>
+        </td>
+        <td>
+          <span title = "Alpha" id = "resultAlpha">-</span>
+        </td>
+        <td>
+          <div class = "previewColour" id = "resultColour"></div>
+        </td>
+      </tr>
+
+    </table>
+
+  </center>
+
+  </body>
+
+</html>
